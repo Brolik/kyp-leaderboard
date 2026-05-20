@@ -1,0 +1,61 @@
+<!--
+  sports-widget/src/template.html
+  Injected into widget.js at build time as a JS template literal.
+
+  Available template variables (replaced by build script):
+    none — the template is a static HTML skeleton; dynamic content
+    is inserted by JS using data-kyp-* attribute hooks below.
+
+  JS hooks (querySelectorAll targets):
+    [data-sw="title-wrap"]      ← where cache badge is appended
+    [data-sw="title"]           ← h2 text
+    [data-sw="controls"]        ← radio groups are appended here
+    [data-sw="gender-row"]      ← gender radio group container
+    [data-sw="event-row"]       ← event radio group container
+    [data-sw="cat-label"]       ← current category text
+    [data-sw="table-wrap"]      ← leaderboard table injected here
+    [data-sw="meta"]            ← last-updated timestamp
+-->
+<div class="kyp-root">
+
+  <div class="kyp-header">
+    <div class="kyp-title-wrap" data-sw="title-wrap">
+      <h2 class="kyp-title" data-sw="title">Leaderboard</h2>
+    </div>
+  </div>
+
+  <div class="kyp-controls">
+    <div class="kyp-control-row" data-sw="gender-row">
+      <span class="kyp-control-label">Gender</span>
+    </div>
+    <div class="kyp-control-row" data-sw="event-row">
+      <span class="kyp-control-label">Event</span>
+    </div>
+    <div class="kyp-control-row kyp-search-row" data-sw="search-row">
+      <span class="kyp-control-label">Search</span>
+      <input type="search" class="kyp-search-input" data-sw="search-input" placeholder="Find player…" autocomplete="off" spellcheck="false">
+      <span class="kyp-search-nav" data-sw="search-nav" style="display:none">
+        <button class="kyp-search-btn" data-sw="search-prev" aria-label="Previous match">&#8593;</button>
+        <span class="kyp-search-count" data-sw="search-count"></span>
+        <button class="kyp-search-btn" data-sw="search-next" aria-label="Next match">&#8595;</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="kyp-cat-label" data-sw="cat-label"></div>
+
+  <div class="kyp-table-wrap" data-sw="table-wrap"></div>
+
+  <p class="kyp-meta" data-sw="meta"></p>
+
+  <div class="kyp-modal-backdrop" data-sw="modal" aria-hidden="true" role="presentation">
+    <div class="kyp-modal" role="dialog" aria-modal="true" aria-labelledby="kyp-modal-title">
+      <div class="kyp-modal-header">
+        <h3 class="kyp-modal-title" id="kyp-modal-title" data-sw="modal-title"></h3>
+        <button class="kyp-modal-close" data-sw="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="kyp-modal-body" data-sw="modal-body"></div>
+    </div>
+  </div>
+
+</div>
