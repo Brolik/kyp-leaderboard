@@ -193,6 +193,14 @@
           var etKey  = (r.event_type || "").trim().toLowerCase();
           var et     = pointsMap[etKey] || {};
           var pts    = Number(et[medal + "_points"]) || 0;
+          var partner = null;
+          for (var pi = 0; pi < arr.length; pi++) {
+            var op = arr[pi];
+            if (op && op.uuid && extractUUID(op.uuid) !== playerUUID) {
+              partner = op.name || null;
+              break;
+            }
+          }
           playerResults.push({
             event_name:   String(r.event_name   || "—"),
             event_type:   String(r.event_type   || "—"),
@@ -201,6 +209,7 @@
             event:        String(r.event        || "—"),
             medal:        medal,
             points:       pts,
+            partner:      partner,
           });
         });
       });
@@ -311,11 +320,13 @@
     var icons  = { gold: "🥇", silver: "🥈", bronze: "🥉" };
     var labels = { gold: "Gold", silver: "Silver", bronze: "Bronze" };
     var table  = el("table", { "class": "kyp-table kyp-modal-table" });
+    var hasPartner = playerResults.some(function (r) { return r.partner; });
     table.appendChild(el("thead", null, [el("tr", null, [
       el("th", { "class": "kyp-th" },              ["Event Name"]),
       el("th", { "class": "kyp-th" },              ["Event Type"]),
       el("th", { "class": "kyp-th kyp-th-center" }, ["Skill Level"]),
       el("th", { "class": "kyp-th" },              ["Gender / Event"]),
+      hasPartner ? el("th", { "class": "kyp-th" }, ["Partner"]) : null,
       el("th", { "class": "kyp-th" },              ["Result"]),
     ])]));
     var tbody = el("tbody");
@@ -329,6 +340,7 @@
         el("td", { "class": "kyp-td" },              [r.event_type]),
         el("td", { "class": "kyp-td kyp-td-center" }, [r.result_skill]),
         el("td", { "class": "kyp-td" },              [r.event_gender + " / " + r.event]),
+        hasPartner ? el("td", { "class": "kyp-td" }, [r.partner || "—"]) : null,
         el("td", { "class": "kyp-td" },              [badge]),
       ]));
     });
