@@ -207,6 +207,8 @@
             result_skill: String(r.result_skill || "—"),
             event_gender: String(r.event_gender || "—"),
             event:        String(r.event        || "—"),
+            event_venue:  String(r.event_venue  || "—"),
+            home_club:    String(p.home_club     || "—"),
             medal:        medal,
             points:       pts,
             partner:      partner,
@@ -323,6 +325,8 @@
     var hasPartner = playerResults.some(function (r) { return r.partner; });
     table.appendChild(el("thead", null, [el("tr", null, [
       el("th", { "class": "kyp-th" },              ["Event Name"]),
+      el("th", { "class": "kyp-th" },              ["Venue"]),
+      el("th", { "class": "kyp-th" },              ["Home Club"]),
       el("th", { "class": "kyp-th" },              ["Event Type"]),
       el("th", { "class": "kyp-th kyp-th-center" }, ["Skill Level"]),
       el("th", { "class": "kyp-th" },              ["Gender / Event"]),
@@ -337,6 +341,8 @@
       ]);
       tbody.appendChild(el("tr", { "class": i % 2 === 0 ? "kyp-tr" : "kyp-tr kyp-tr-alt" }, [
         el("td", { "class": "kyp-td" },              [r.event_name]),
+        el("td", { "class": "kyp-td" },              [r.event_venue]),
+        el("td", { "class": "kyp-td" },              [r.home_club]),
         el("td", { "class": "kyp-td" },              [r.event_type]),
         el("td", { "class": "kyp-td kyp-td-center" }, [r.result_skill]),
         el("td", { "class": "kyp-td" },              [r.event_gender + " / " + r.event]),
@@ -401,19 +407,49 @@
     var tableWrap = qs(root, "table-wrap");
     var catLabel  = qs(root, "cat-label");
     var titleWrap = qs(root, "title-wrap");
-    var modal     = qs(root, "modal");
-    var modalTitle  = qs(root, "modal-title");
-    var modalBody   = qs(root, "modal-body");
-    var searchInput = qs(root, "search-input");
-    var searchNav   = qs(root, "search-nav");
-    var searchCount = qs(root, "search-count");
-    var searchPrev  = qs(root, "search-prev");
-    var searchNext  = qs(root, "search-next");
+    var modal         = qs(root, "modal");
+    var modalTitle    = qs(root, "modal-title");
+    var modalControls = qs(root, "modal-controls");
+    var modalBody     = qs(root, "modal-body");
+    var searchInput   = qs(root, "search-input");
+    var searchNav     = qs(root, "search-nav");
+    var searchCount   = qs(root, "search-count");
+    var searchPrev    = qs(root, "search-prev");
+    var searchNext    = qs(root, "search-next");
 
-    function openModal(name, playerResults) {
-      modalTitle.textContent = name + " — Results";
-      modalBody.innerHTML    = "";
-      modalBody.appendChild(renderPlayerResultsTable(playerResults));
+    function openModal(uuid, name, allResults, initialEvent) {
+      var selModalEvent = initialEvent || "singles";
+
+      // Build header: "Name (State) #duprID - Home Club"
+      var profile = (liveData.players || []).filter(function (p) { return p.uuid === uuid; })[0] || {};
+      var header  = name;
+      if (profile.state)     header += " (" + profile.state + ")";
+      if (profile.dupr_id)   header += " #" + profile.dupr_id;
+      if (profile.home_club) header += " - " + profile.home_club;
+      modalTitle.textContent = header;
+
+      // Event-type switcher
+      modalControls.innerHTML = "";
+      modalControls.appendChild(radioGroup("modal-event", [
+        { value: "singles", label: "Singles" },
+        { value: "doubles", label: "Doubles" },
+        { value: "mixed",   label: "Mixed"   },
+      ], selModalEvent, function (v) {
+        selModalEvent = v;
+        renderModalResults();
+      }));
+
+      function renderModalResults() {
+        var filtered = allResults.filter(function (r) {
+          return selModalEvent === "mixed"
+            ? r.event_gender.toLowerCase() === "mixed"
+            : r.event.toLowerCase()        === selModalEvent && r.event_gender.toLowerCase() !== "mixed";
+        });
+        modalBody.innerHTML = "";
+        modalBody.appendChild(renderPlayerResultsTable(filtered));
+      }
+
+      renderModalResults();
       modal.setAttribute("aria-hidden", "false");
       document.addEventListener("keydown", onModalKey);
     }
@@ -435,7 +471,7 @@
       tableWrap.innerHTML  = "";
       tableWrap.appendChild(renderLeaderboard(
         buildLeaderboard(liveData, selGender, selEvent),
-        function (uuid, name) { openModal(name, buildPlayerResults(liveData, uuid)); }
+        function (uuid, name) { openModal(uuid, name, buildPlayerResults(liveData, uuid), selEvent); }
       ));
       if (searchQuery.trim()) applySearch();
     }

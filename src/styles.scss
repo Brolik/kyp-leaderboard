@@ -391,7 +391,8 @@ $rank-bronze-text:#92400e;
   background: var(--c-bg);
   border-radius: 12px;
   border: 1px solid var(--c-border);
-  width: min(640px, 92vw);
+  width: max-content;
+  max-width: calc(100vw - 50px);
   max-height: 80vh;
   display: flex;
   flex-direction: column;
@@ -427,6 +428,14 @@ $rank-bronze-text:#92400e;
 
   &:hover { background: var(--c-bg3); color: var(--c-text); }
   &:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+}
+
+.kyp-modal-controls {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--c-border);
+  flex-shrink: 0;
+
+  .kyp-radio-group { gap: 4px; }
 }
 
 .kyp-modal-body {
