@@ -85,6 +85,14 @@
     return dashIdx !== -1 ? raw.slice(dashIdx + 1).trim() : raw.trim();
   }
 
+  // Normalise varied gender spellings ("Male","M","male") → "mens" / "womens"
+  function normalizeGender(g) {
+    var s = (g || "").trim().toLowerCase();
+    if (s === "male"   || s === "m") return "mens";
+    if (s === "female" || s === "f") return "womens";
+    return s;
+  }
+
   // ── Leaderboard computation ──────────────────────────────────────────────
   function buildLeaderboard(data, filterGender, filterEvent) {
     var results    = data.results    || [];
@@ -119,13 +127,18 @@
       }
     }
 
-    function award(medalVal, medalType, pts) {
+    function award(medalVal, medalType, pts, genderFilter) {
       if (!medalVal) return;
       var players = Array.isArray(medalVal) ? medalVal : [medalVal];
       players.forEach(function (p) {
         if (!p || !p.uuid) return;
         var realUUID = extractUUID(p.uuid);
         if (!realUUID) return;
+        if (genderFilter) {
+          var resolved = playersByUUID[realUUID];
+          var pg = normalizeGender(p.gender || (resolved && resolved.gender));
+          if (pg !== genderFilter) return;
+        }
         ensurePlayer(p);
         if (!acc[realUUID]) return;
         acc[realUUID].points     += pts;
@@ -134,13 +147,21 @@
     }
 
     results.forEach(function (r) {
-      if ((r.event_gender || "").trim().toLowerCase() !== filterGender.toLowerCase()) return;
-      if ((r.event        || "").trim().toLowerCase() !== filterEvent.toLowerCase())  return;
+      var rGender = (r.event_gender || "").trim().toLowerCase();
+      var rEvent  = (r.event        || "").trim().toLowerCase();
+      var genderFilter = null;
+      if (filterEvent.toLowerCase() === "mixed") {
+        if (rGender !== "mixed") return;
+        genderFilter = filterGender.toLowerCase(); // rank men vs men, women vs women
+      } else {
+        if (rGender !== filterGender.toLowerCase()) return;
+        if (rEvent  !== filterEvent.toLowerCase())  return;
+      }
       var skillKey = (r.event_type || "").trim().toLowerCase();
       var pts = pointsMap[skillKey] || { gold: 0, silver: 0, bronze: 0 };
-      award(r.gold_medal,   "gold",   pts.gold);
-      award(r.silver_medal, "silver", pts.silver);
-      award(r.bronze_medal, "bronze", pts.bronze);
+      award(r.gold_medal,   "gold",   pts.gold,   genderFilter);
+      award(r.silver_medal, "silver", pts.silver, genderFilter);
+      award(r.bronze_medal, "bronze", pts.bronze, genderFilter);
     });
 
     return Object.values(acc).sort(function (a, b) {
@@ -173,11 +194,11 @@
           var et     = pointsMap[etKey] || {};
           var pts    = Number(et[medal + "_points"]) || 0;
           playerResults.push({
-            event_name:   r.event_name   || "—",
-            event_type:   r.event_type   || "—",
-            result_skill: r.result_skill || "—",
-            event_gender: r.event_gender || "—",
-            event:        r.event        || "—",
+            event_name:   String(r.event_name   || "—"),
+            event_type:   String(r.event_type   || "—"),
+            result_skill: String(r.result_skill || "—"),
+            event_gender: String(r.event_gender || "—"),
+            event:        String(r.event        || "—"),
             medal:        medal,
             points:       pts,
           });
@@ -195,7 +216,7 @@
     });
     if (kids) kids.forEach(function (c) {
       if (c == null) return;
-      n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+      n.appendChild(c instanceof Node ? c : document.createTextNode(String(c)));
     });
     return n;
   }
@@ -352,12 +373,12 @@
     qs(root, "gender-row").appendChild(radioGroup("gender", [
       { value: "mens",   label: "Mens"   },
       { value: "womens", label: "Womens" },
-      { value: "mixed",  label: "Mixed"  },
     ], selGender, function (v) { selGender = v; refresh(); }));
 
     qs(root, "event-row").appendChild(radioGroup("event", [
       { value: "singles", label: "Singles" },
       { value: "doubles", label: "Doubles" },
+      { value: "mixed",   label: "Mixed"   },
     ], selEvent, function (v) { selEvent = v; refresh(); }));
 
     // Meta timestamp
