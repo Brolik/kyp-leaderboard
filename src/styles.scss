@@ -2,7 +2,7 @@
 // Light mode tokens (overridden in dark mode block below)
 $accent:        #1677bc;
 $bg:            #fff;
-$bg2:           #0e152c;
+$bg2:           #e3e3e3;
 $bg3:           #e3e3e34d;
 $border:        #d0d8e1;
 $text:          #111827;
@@ -21,6 +21,8 @@ $rank-bronze-text:#92400e;
   font-size: 14px;
   color: var(--c-text, #{$text});
   background: var(--c-bg, #{$bg});
+  border-radius: 25px;
+  padding: 25px;
 
   // CSS custom properties for runtime theming
   --c-accent:  #{$accent};
@@ -84,7 +86,7 @@ $rank-bronze-text:#92400e;
 .kyp-control-label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--c-bg);
+  color: var(--c-text);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 52px;
@@ -165,7 +167,7 @@ $rank-bronze-text:#92400e;
 .kyp-th {
   padding: 10px 12px;
   background: var(--c-bg2);
-  color: var(--c-bg);
+  color: var(--c-text);
   font-weight: 600;
   font-size: 13px;
   text-transform: uppercase;
@@ -311,13 +313,13 @@ $rank-bronze-text:#92400e;
 // ── Dark mode ──────────────────────────────────────────────────────────────
 @media (prefers-color-scheme: dark) {
   .kyp-root {
-    --c-accent:  #60a5fa;
-    --c-bg:      #111827;
-    --c-bg2:     #1a2235;
+    --c-accent:  #e3e3e3;
+    --c-bg:      #0e152c;
+    --c-bg2:     #1e2a40;
     --c-bg3:     #1e2a40;
     --c-border:  #2d3a52;
     --c-text:    #f1f5f9;
-    --c-muted:   #94a3b8;
+    --c-muted:   #fff;
   }
 
   .kyp-cache-badge { background: #1e3a6e; color: #93c5fd; }
@@ -441,7 +443,7 @@ $rank-bronze-text:#92400e;
   border-bottom: 1px solid var(--c-border);
   flex-shrink: 0;
 
-  .kyp-radio-group { gap: 4px; }
+  .kyp-radio-group { gap: 6px; }
 }
 
 .kyp-modal-body {
