@@ -22,7 +22,6 @@ $rank-bronze-text:#92400e;
   color: var(--c-text, #{$text});
   background: var(--c-bg, #{$bg});
   border-radius: 25px;
-  padding: 25px;
 
   // CSS custom properties for runtime theming
   --c-accent:  #{$accent};
@@ -74,6 +73,10 @@ $rank-bronze-text:#92400e;
   background: var(--c-bg2);
   border-radius: 10px;
   border: 1px solid var(--c-border);
+
+  @media screen and (max-width: 380px) {
+    padding: 10px;
+  }
 }
 
 .kyp-control-row {
@@ -137,6 +140,14 @@ $rank-bronze-text:#92400e;
   &:hover {
     border-color: var(--c-accent);
     color: var(--c-accent);
+  }
+
+  @media screen and (max-width: 678px) {
+    font-size: 16px;
+  }
+
+  @media screen and (max-width: 480px) {
+    font-size: 14px;
   }
 }
 
@@ -405,6 +416,11 @@ $rank-bronze-text:#92400e;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+  @media screen and (max-width: 380px) {
+    padding: 12px;
+    max-width: calc(100vw - 36px);
+  }
 }
 
 .kyp-modal-header {
@@ -414,6 +430,10 @@ $rank-bronze-text:#92400e;
   padding: 16px 8px;
   border-bottom: 1px solid var(--c-border);
   flex-shrink: 0;
+
+  @media screen and (max-width: 380px) {
+    padding-top: 8px;
+  }
 }
 
 .kyp-modal-title {
