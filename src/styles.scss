@@ -74,6 +74,8 @@ $rank-bronze-text:#92400e;
   background: var(--c-bg2);
   border-radius: 10px;
   border: 1px solid var(--c-border);
+  overflow: hidden;
+  position: relative;
 
   @media screen and (max-width: 380px) {
     padding: 10px;
@@ -85,6 +87,7 @@ $rank-bronze-text:#92400e;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  z-index: 1;
 }
 
 .kyp-control-label {
@@ -94,6 +97,24 @@ $rank-bronze-text:#92400e;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 52px;
+}
+
+.kyp-control-decoration {
+  position: absolute;
+  right: -70px;
+  top: -188px;
+  z-index: 0;
+
+  @media screen and (max-width: 600px) {
+    right: -200px;
+    top: 0;
+  }
+}
+
+.kyp-control-decoration svg {
+  height: 100%;
+  opacity: .6;
+  width: 100%;
 }
 
 .kyp-radio-group {
@@ -457,6 +478,26 @@ $rank-bronze-text:#92400e;
 
   &:hover { background: var(--c-bg3); color: var(--c-text); }
   &:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+}
+
+.kyp-modal-wrapper {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 30px 1fr;
+
+  @media screen and (max-width: 380px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kyp-modal-wrapper i svg {
+  height: 100%;
+  width: 100%;
+
+  @media screen and (max-width: 380px) {
+    max-width: 30px;
+  }
 }
 
 .kyp-modal-controls {
