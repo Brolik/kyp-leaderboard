@@ -22,7 +22,7 @@ $rank-bronze-text:#92400e;
   color: var(--c-text, #{$text});
   background: var(--c-bg, #{$bg});
   border-radius: 25px;
-  padding: 10px;
+  padding: 16px;
 
   // CSS custom properties for runtime theming
   --c-accent:  #{$accent};
