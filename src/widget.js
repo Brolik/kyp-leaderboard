@@ -121,9 +121,10 @@
       var name  = (p.name  || (resolved && resolved.name))      || "Unknown";
       var state = (p.state || (resolved && resolved.state))     || "\u2014";
       var club  = (p.home_club || (resolved && resolved.home_club)) || "\u2014";
+      var dupr  = (p.dupr_id || (resolved && resolved.dupr_id)) || null;
       if (!acc[realUUID]) {
         acc[realUUID] = { uuid: realUUID, name: name, state: state, home_club: club,
-                          points: 0, gold: 0, silver: 0, bronze: 0 };
+                          dupr_id: dupr, points: 0, gold: 0, silver: 0, bronze: 0 };
       }
     }
 
@@ -291,14 +292,20 @@
       var ptsTd = el("td", { "class": "kyp-td kyp-td-center kyp-td-pts" });
       ptsTd.appendChild(el("strong", null, [String(row.points)]));
       var nameCell;
+      var duprEl = row.dupr_id
+        ? el("span", { "class": "kyp-dupr-id" }, ["Dupr Id: " + row.dupr_id])
+        : null;
       if (onNameClick) {
-        var btn = el("button", { "class": "kyp-name-btn" }, [row.name]);
+        var nameSpan = el("span", { "class": "kyp-name-text" }, [row.name]);
+        var btnChildren = duprEl ? [nameSpan, duprEl] : [nameSpan];
+        var btn = el("button", { "class": "kyp-name-btn" }, btnChildren);
         (function (uuid, name) {
           btn.addEventListener("click", function () { onNameClick(uuid, name); });
         }(row.uuid, row.name));
         nameCell = el("td", { "class": "kyp-td kyp-td-name" }, [btn]);
       } else {
-        nameCell = el("td", { "class": "kyp-td kyp-td-name" }, [row.name]);
+        var cellChildren = duprEl ? [row.name, duprEl] : [row.name];
+        nameCell = el("td", { "class": "kyp-td kyp-td-name" }, cellChildren);
       }
       tbody.appendChild(el("tr", { "class": i % 2 === 0 ? "kyp-tr" : "kyp-tr kyp-tr-alt", "data-name": row.name }, [
         rankBadge(displayRank),
@@ -326,9 +333,7 @@
     table.appendChild(el("thead", null, [el("tr", null, [
       el("th", { "class": "kyp-th" },              ["Event Name"]),
       el("th", { "class": "kyp-th" },              ["Venue"]),
-      el("th", { "class": "kyp-th" },              ["Home Club"]),
       el("th", { "class": "kyp-th" },              ["Event Type"]),
-      el("th", { "class": "kyp-th kyp-th-center" }, ["Skill Level"]),
       el("th", { "class": "kyp-th" },              ["Gender / Event"]),
       hasPartner ? el("th", { "class": "kyp-th" }, ["Partner"]) : null,
       el("th", { "class": "kyp-th" },              ["Result"]),
@@ -342,9 +347,7 @@
       tbody.appendChild(el("tr", { "class": i % 2 === 0 ? "kyp-tr" : "kyp-tr kyp-tr-alt" }, [
         el("td", { "class": "kyp-td" },              [r.event_name]),
         el("td", { "class": "kyp-td" },              [r.event_venue]),
-        el("td", { "class": "kyp-td" },              [r.home_club]),
         el("td", { "class": "kyp-td" },              [r.event_type]),
-        el("td", { "class": "kyp-td kyp-td-center" }, [r.result_skill]),
         el("td", { "class": "kyp-td" },              [r.event_gender + " / " + r.event]),
         hasPartner ? el("td", { "class": "kyp-td" }, [r.partner || "—"]) : null,
         el("td", { "class": "kyp-td" },              [badge]),

@@ -2,8 +2,12 @@
 // CONFIGURATION — edit these before deploying
 // ============================================================
 const CONFIG = {
-  API_KEY: "",           // change this
-  ALLOWED_ORIGINS: [],                                       // file:// origins],
+  // Each entry: "api-key-value": { origins: ["https://example.com"] }
+  // Use origins: "*" for a testing key with no origin restriction.
+  KEYS: {
+    "": { origins: "*" },               // no key → unrestricted
+    "test-key-replace-me": { origins: "*" }, // test key → unrestricted
+  },
   SHEET_NAMES: {
     results:           "results",
     players:           "players",
@@ -36,13 +40,14 @@ function handleRequest(e) {
 
   // Validate API key
   const apiKey = (e && e.parameter && e.parameter.api_key) || "";
-  if (apiKey !== CONFIG.API_KEY) {
+  const keyConfig = CONFIG.KEYS[apiKey];
+  if (!keyConfig) {
     return jsonResponse({ error: "Unauthorized" }, 401, headers);
   }
 
-  // Validate origin
-  if (!isOriginAllowed(origin)) {
-    return jsonResponse({ error: "Forbidden origin" }, 403, headers);
+  // Validate origin (testing keys with origins:"*" bypass this check)
+  if (keyConfig.origins !== "*" && !isOriginAllowed(origin, keyConfig.origins)) {
+    return jsonResponse({ error: "Forbidden origin: " + (origin || "(none)") }, 403, headers);
   }
 
   const action = (e && e.parameter && e.parameter.action) || "all";
@@ -66,10 +71,9 @@ function handleRequest(e) {
 // SECURITY HELPERS
 // ============================================================
 
-function isOriginAllowed(origin) {
+function isOriginAllowed(origin, origins) {
   if (!origin) return false;
-  return CONFIG.ALLOWED_ORIGINS.some(allowed => {
-    // exact match or wildcard subdomain support
+  return origins.some(allowed => {
     if (allowed === origin) return true;
     if (allowed.startsWith("*.")) {
       const base = allowed.slice(2);
@@ -79,8 +83,13 @@ function isOriginAllowed(origin) {
   });
 }
 
-function buildCorsHeaders(origin) {
-  const allowedOrigin = isOriginAllowed(origin) ? origin : CONFIG.ALLOWED_ORIGINS[0];
+function buildCorsHeaders(origin, keyConfig) {
+  // Testing keys (origins:"*") reflect the request origin; production keys
+  // only echo origins that are explicitly allowed.
+  const isTesting = keyConfig && keyConfig.origins === "*";
+  const allowedOrigin = isTesting
+    ? (origin || "*")
+    : (isOriginAllowed(origin, keyConfig ? keyConfig.origins : []) ? origin : (keyConfig && keyConfig.origins[0]) || "");
   return {
     "Access-Control-Allow-Origin":  allowedOrigin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",

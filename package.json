@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks && git config merge.ours-rebuild.driver true",
     "build": "node build.js",
     "watch": "node build.js --watch",
-    "dev": "node build.js --watch"
+    "dev": "node build.js --watch",
+    "docker:up": "docker compose --env-file .env.docker up -d",
+    "docker:down": "docker compose --env-file .env.docker down",
+    "craft": "docker compose exec web php /var/www/html/craft/craft",
+    "composer": "docker compose exec web composer",
+    "docker:exec": "docker compose exec web"
   },
   "devDependencies": {
     "chokidar": "^3.6.0",
