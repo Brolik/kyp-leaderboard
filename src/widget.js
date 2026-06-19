@@ -333,9 +333,7 @@
     table.appendChild(el("thead", null, [el("tr", null, [
       el("th", { "class": "kyp-th" },              ["Event Name"]),
       el("th", { "class": "kyp-th" },              ["Venue"]),
-      el("th", { "class": "kyp-th" },              ["Home Club"]),
       el("th", { "class": "kyp-th" },              ["Event Type"]),
-      el("th", { "class": "kyp-th kyp-th-center" }, ["Skill Level"]),
       el("th", { "class": "kyp-th" },              ["Gender / Event"]),
       hasPartner ? el("th", { "class": "kyp-th" }, ["Partner"]) : null,
       el("th", { "class": "kyp-th" },              ["Result"]),
@@ -349,9 +347,7 @@
       tbody.appendChild(el("tr", { "class": i % 2 === 0 ? "kyp-tr" : "kyp-tr kyp-tr-alt" }, [
         el("td", { "class": "kyp-td" },              [r.event_name]),
         el("td", { "class": "kyp-td" },              [r.event_venue]),
-        el("td", { "class": "kyp-td" },              [r.home_club]),
         el("td", { "class": "kyp-td" },              [r.event_type]),
-        el("td", { "class": "kyp-td kyp-td-center" }, [r.result_skill]),
         el("td", { "class": "kyp-td" },              [r.event_gender + " / " + r.event]),
         hasPartner ? el("td", { "class": "kyp-td" }, [r.partner || "—"]) : null,
         el("td", { "class": "kyp-td" },              [badge]),
