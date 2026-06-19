@@ -1,0 +1,2 @@
+dist/*.js  merge=ours-rebuild
+dist/*.css merge=ours-rebuild

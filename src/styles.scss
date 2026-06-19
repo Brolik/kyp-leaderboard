@@ -1,12 +1,12 @@
 // ── Variables ──────────────────────────────────────────────────────────────
 // Light mode tokens (overridden in dark mode block below)
-$accent:        #2563eb;
+$accent:        #1677bc;
 $bg:            #fff;
-$bg2:           #f8faff;
-$bg3:           #f0f4fb;
-$border:        #e0e7f0;
+$bg2:           #e3e3e3;
+$bg3:           #e3e3e34d;
+$border:        #d0d8e1;
 $text:          #111827;
-$muted:         #6b7280;
+$muted:         #000;
 
 $rank-gold-bg:    #fef3c7;
 $rank-gold-text:  #92400e;
@@ -17,10 +17,12 @@ $rank-bronze-text:#92400e;
 
 // ── Root ───────────────────────────────────────────────────────────────────
 .kyp-root {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: Hind, Arial, sans-serif;
   font-size: 14px;
   color: var(--c-text, #{$text});
   background: var(--c-bg, #{$bg});
+  border-radius: 25px;
+  padding: 25px;
 
   // CSS custom properties for runtime theming
   --c-accent:  #{$accent};
@@ -47,10 +49,10 @@ $rank-bronze-text:#92400e;
 
 .kyp-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  color: var(--c-accent);
+  // font-size: 20px;
+  // font-weight: 700;
+  // letter-spacing: 1px;
+  color: var(--c-muted);
 }
 
 .kyp-cache-badge {
@@ -66,10 +68,10 @@ $rank-bronze-text:#92400e;
 .kyp-controls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   margin-bottom: 16px;
-  padding: 12px 14px;
-  background: var(--c-bg3);
+  padding: 16px 18px;
+  background: var(--c-bg2);
   border-radius: 10px;
   border: 1px solid var(--c-border);
 }
@@ -82,9 +84,9 @@ $rank-bronze-text:#92400e;
 }
 
 .kyp-control-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--c-muted);
+  color: var(--c-text);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 52px;
@@ -119,11 +121,16 @@ $rank-bronze-text:#92400e;
   padding: 5px 14px;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 18px;
+  font-family: "Teko Variablefont Wght", Verdana, sans-serif;
   font-weight: 500;
   background: var(--c-bg);
   border: 1.5px solid var(--c-border);
   color: var(--c-muted);
+  letter-spacing: 2px;
+  line-height: normal;
+  margin-bottom: 0;
+  text-transform: uppercase;
   transition: background 0.12s, color 0.12s, border-color 0.12s;
   user-select: none;
 
@@ -159,10 +166,10 @@ $rank-bronze-text:#92400e;
 
 .kyp-th {
   padding: 10px 12px;
-  background: var(--c-bg3);
-  color: var(--c-muted);
+  background: var(--c-bg2);
+  color: var(--c-text);
   font-weight: 600;
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--c-border);
@@ -174,7 +181,7 @@ $rank-bronze-text:#92400e;
 }
 
 .kyp-tr          { background: var(--c-bg); }
-.kyp-tr-alt      { background: var(--c-bg2); }
+.kyp-tr-alt      { background: var(--c-bg3); }
 
 .kyp-tr,
 .kyp-tr-alt {
@@ -306,13 +313,13 @@ $rank-bronze-text:#92400e;
 // ── Dark mode ──────────────────────────────────────────────────────────────
 @media (prefers-color-scheme: dark) {
   .kyp-root {
-    --c-accent:  #60a5fa;
-    --c-bg:      #111827;
-    --c-bg2:     #1a2235;
+    --c-accent:  #e3e3e3;
+    --c-bg:      #0e152c;
+    --c-bg2:     #1e2a40;
     --c-bg3:     #1e2a40;
     --c-border:  #2d3a52;
     --c-text:    #f1f5f9;
-    --c-muted:   #94a3b8;
+    --c-muted:   #fff;
   }
 
   .kyp-cache-badge { background: #1e3a6e; color: #93c5fd; }
@@ -394,6 +401,7 @@ $rank-bronze-text:#92400e;
   width: max-content;
   max-width: calc(100vw - 50px);
   max-height: 80vh;
+  padding: 25px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -403,7 +411,7 @@ $rank-bronze-text:#92400e;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 16px 8px;
   border-bottom: 1px solid var(--c-border);
   flex-shrink: 0;
 }
@@ -431,11 +439,11 @@ $rank-bronze-text:#92400e;
 }
 
 .kyp-modal-controls {
-  padding: 10px 20px;
+  padding: 14px 6px;
   border-bottom: 1px solid var(--c-border);
   flex-shrink: 0;
 
-  .kyp-radio-group { gap: 4px; }
+  .kyp-radio-group { gap: 6px; }
 }
 
 .kyp-modal-body {
@@ -483,8 +491,8 @@ $rank-bronze-text:#92400e;
 // ── Search control ─────────────────────────────────────────────────────────
 .kyp-search-row {
   margin-top: 4px;
-  border-top: 1px solid var(--c-border);
-  padding-top: 8px;
+  border-top: 1px solid var(--c-accent);
+  padding-top: 12px;
 }
 
 .kyp-search-input {
