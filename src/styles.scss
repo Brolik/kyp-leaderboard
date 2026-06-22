@@ -6,7 +6,7 @@ $bg2:           #e3e3e3;
 $bg3:           #e3e3e34d;
 $border:        #d0d8e1;
 $text:          #111827;
-$muted:         #000;
+$muted:         rgba(0,0,0,.67);
 
 $rank-gold-bg:    #fef3c7;
 $rank-gold-text:  #92400e;
@@ -352,7 +352,7 @@ $rank-bronze-text:#92400e;
     --c-bg3:     #1e2a40;
     --c-border:  #2d3a52;
     --c-text:    #f1f5f9;
-    --c-muted:   #fff;
+    --c-muted:   rgba(255,255,255.67);
   }
 
   .kyp-cache-badge { background: #1e3a6e; color: #93c5fd; }
@@ -417,7 +417,7 @@ $rank-bronze-text:#92400e;
 
 .kyp-dupr-id {
   display:block;
-  color: rgba(255,255,255,.67);
+  color: var(--c-muted);
   font-size:.7em;
   padding-top:5px;
   font-variant: small-caps;
