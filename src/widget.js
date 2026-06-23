@@ -292,20 +292,15 @@
       var ptsTd = el("td", { "class": "kyp-td kyp-td-center kyp-td-pts" });
       ptsTd.appendChild(el("strong", null, [String(row.points)]));
       var nameCell;
-      var duprEl = row.dupr_id
-        ? el("span", { "class": "kyp-dupr-id" }, ["Dupr Id: " + row.dupr_id])
-        : null;
       if (onNameClick) {
         var nameSpan = el("span", { "class": "kyp-name-text" }, [row.name]);
-        var btnChildren = duprEl ? [nameSpan, duprEl] : [nameSpan];
-        var btn = el("button", { "class": "kyp-name-btn" }, btnChildren);
+        var btn = el("button", { "class": "kyp-name-btn" }, [nameSpan]);
         (function (uuid, name) {
           btn.addEventListener("click", function () { onNameClick(uuid, name); });
         }(row.uuid, row.name));
         nameCell = el("td", { "class": "kyp-td kyp-td-name" }, [btn]);
       } else {
-        var cellChildren = duprEl ? [row.name, duprEl] : [row.name];
-        nameCell = el("td", { "class": "kyp-td kyp-td-name" }, cellChildren);
+        nameCell = el("td", { "class": "kyp-td kyp-td-name" }, [row.name]);
       }
       tbody.appendChild(el("tr", { "class": i % 2 === 0 ? "kyp-tr" : "kyp-tr kyp-tr-alt", "data-name": row.name }, [
         rankBadge(displayRank),

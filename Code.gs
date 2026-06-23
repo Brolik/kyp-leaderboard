@@ -175,8 +175,17 @@ function getResultsData() {
     if (!p.name) return;
     const duprPart  = p.dupr_id ? ` [${p.dupr_id}]` : "";
     const statePart = p.state   ? ` - ${p.state}`    : "";
+    // Current format: "Name - State [DUPR]"
     playerDisplayMap[`${p.name}${statePart}${duprPart}`.toLowerCase()] = p;
+    // Old format: "Name - State - [DUPR]" (dash before bracket)
+    if (p.dupr_id) {
+      playerDisplayMap[`${p.name}${statePart} [${p.dupr_id}]`.toLowerCase()] = p;
+    }
   });
+
+  // Fallback by DUPR ID alone — handles any display format with [DUPR_ID] at the end
+  const playerDuprMap = {};
+  players.forEach(p => { if (p.dupr_id) playerDuprMap[p.dupr_id.toLowerCase()] = p; });
 
   const MEDAL_COLS = ["gold_medal", "silver_medal", "bronze_medal"];
 
@@ -196,11 +205,17 @@ function getResultsData() {
         if (dashIdx !== -1) return trimmed.slice(dashIdx + 1).trim();
         return trimmed;
       }).filter(Boolean);
-      const resolved = uuids.map(uid =>
-        playerMap[uid]
-        || playerDisplayMap[uid.toLowerCase()]
-        || { uuid: uid, name: null, state: null, dupr_id: null }
-      );
+      const resolved = uuids.map(uid => {
+        if (playerMap[uid]) return playerMap[uid];
+        if (playerDisplayMap[uid.toLowerCase()]) return playerDisplayMap[uid.toLowerCase()];
+        // Extract DUPR ID from any "[XXXXX]" at the end of the display string
+        const duprMatch = uid.match(/\[([^\]]+)\]\s*$/);
+        if (duprMatch) {
+          const byDupr = playerDuprMap[duprMatch[1].toLowerCase()];
+          if (byDupr) return byDupr;
+        }
+        return { uuid: uid, name: null, state: null, dupr_id: null };
+      });
       enriched[col] = resolved.length === 1 ? resolved[0] : resolved;
     });
     return enriched;
@@ -290,26 +305,33 @@ function onEditHandler(e) {
 
   const colMap = getHeaderColumnMap_(sheet);
 
-  // ── Players sheet: watch the "name" column ──
+  // ── Players sheet: watch "name" and "dupr_id" columns ──
   if (sheetName === CONFIG.SHEET_NAMES.players) {
     const nameCol = colMap["name"];
-    if (!nameCol || col !== nameCol) return;
+    const duprCol = colMap["dupr_id"];
 
-    const nameVal = sheet.getRange(row, nameCol).getValue();
-    if (!nameVal || nameVal === "") return; // name cleared — do nothing
+    const isNameEdit = nameCol && col === nameCol;
+    const isDuprEdit = duprCol && col === duprCol;
 
-    // uuid: only write if currently empty
-    const uuidCol = colMap["uuid"];
-    if (uuidCol) {
-      const uuidCell = sheet.getRange(row, uuidCol);
-      if (!uuidCell.getValue()) uuidCell.setValue(generateUUID_());
-    }
+    if (!isNameEdit && !isDuprEdit) return;
 
-    // date_created: only write if currently empty
-    const dateCol = colMap["date_created"];
-    if (dateCol) {
-      const dateCell = sheet.getRange(row, dateCol);
-      if (!dateCell.getValue()) dateCell.setValue(new Date().toISOString());
+    if (isNameEdit) {
+      const nameVal = sheet.getRange(row, nameCol).getValue();
+      if (!nameVal || nameVal === "") return; // name cleared — do nothing
+
+      // uuid: only write if currently empty
+      const uuidCol = colMap["uuid"];
+      if (uuidCol) {
+        const uuidCell = sheet.getRange(row, uuidCol);
+        if (!uuidCell.getValue()) uuidCell.setValue(generateUUID_());
+      }
+
+      // date_created: only write if currently empty
+      const dateCol = colMap["date_created"];
+      if (dateCol) {
+        const dateCell = sheet.getRange(row, dateCol);
+        if (!dateCell.getValue()) dateCell.setValue(new Date().toISOString());
+      }
     }
 
     // Refresh the PlayerList named range so medal dropdowns stay current
@@ -377,9 +399,9 @@ function PLAYER_DROPDOWN_LIST() {
   return players
     .filter(p => p.uuid && p.name)
     .map(p => {
-      const duprPart = p.dupr_id ? ` [${p.dupr_id}]` : "";
+      const duprPart = p.dupr_id ? ` - [${p.dupr_id}]` : "";
       const statePart = p.state ? ` - ${p.state}` : "";
-      return [`${p.name}${statePart}${duprPart} — ${p.uuid}`];
+      return [`${p.name}${statePart}${duprPart}`];
     });
 }
 
