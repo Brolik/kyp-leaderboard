@@ -1,0 +1,13 @@
+{
+  "slug": "kyp",
+  "hostname": "kyp.localhost",
+  "framework": "plain",
+  "php": {
+    "version": "8.3"
+  },
+  "node": null,
+  "webRoot": "./",
+  "port": "<auto-assigned-per-developer>",
+  "db": null,
+  "remote": null
+}
