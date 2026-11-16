@@ -15,6 +15,7 @@ const CONFIG = {
     config_skill:      "config_skill_level",
     config_event:      "config_event_types",
     config_state:      "config_state",
+    config_prize:      "config_prize_money",
   },
 };
 
@@ -147,7 +148,15 @@ function getConfigData() {
     event_types:   sheetToObjects(CONFIG.SHEET_NAMES.config_event),
     states:        sheetToObjects(CONFIG.SHEET_NAMES.config_state),
     venues:        sheetToObjects(CONFIG.SHEET_NAMES.venues),
+    prize_money:   optionalSheetToObjects_(CONFIG.SHEET_NAMES.config_prize),
   };
+}
+
+// Like sheetToObjects, but returns [] if the sheet doesn't exist yet.
+function optionalSheetToObjects_(sheetName) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss.getSheetByName(sheetName)) return [];
+  return sheetToObjects(sheetName);
 }
 
 function getPlayersData() {

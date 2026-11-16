@@ -75,7 +75,10 @@
       + "&origin=" + encodeURIComponent(origin);
     var resp = await fetch(url, { cache: "no-store" });
     if (!resp.ok) throw new Error("API " + resp.status);
-    return resp.json();
+    var json = await resp.json();
+    // Apps Script can't set HTTP status codes, so errors arrive as 200 + { error }
+    if (!json || json.error) throw new Error("API error: " + ((json && json.error) || "empty response"));
+    return json;
   }
 
   // ── UUID extraction ──────────────────────────────────────────────────────
@@ -249,10 +252,103 @@
     return wrap;
   }
 
+  // ── Prize money ──────────────────────────────────────────────────────────
+  // Reads config.prize_money rows ({ position, reward }) into { rank: "display" }.
+  // Also accepts { rank, value } column names.
+  function buildPrizeMap(data) {
+    var rows = (data.config && data.config.prize_money) || [];
+    var map  = {};
+    rows.forEach(function (r) {
+      var rank = parseInt(r.position != null ? r.position : r.rank, 10);
+      var val  = r.reward != null ? r.reward : r.value;
+      if (!rank || val == null || String(val).trim() === "") return;
+      var display = formatPrize(val);
+      if (display) map[rank] = display;
+    });
+    return map;
+  }
+
+  function formatPrize(val) {
+    var n = Number(String(val).replace(/[$,\s]/g, ""));
+    if (isNaN(n)) return String(val).trim();
+    if (!n) return null;
+    return "$" + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  }
+
+  // Vector "$" (paths, not font glyphs) so it stays crisp at small sizes.
+  var PRIZE_SVG =
+    '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">' +
+      '<circle class="kyp-prize-disc" cx="10" cy="10" r="9"/>' +
+      '<path class="kyp-prize-sign" d="M10 4.2V15.8M13 7.3C12.4 6.5 11.4 6.1 10 6.1C8.2 6.1 7 7 7 8.2C7 9.5 8.2 10 10 10.2C11.8 10.5 13 11 13 12.2C13 13.4 11.8 14 10 14C8.6 14 7.5 13.6 6.9 12.8"/>' +
+    '</svg>';
+
+  // TODO: replace with the year parsed from the "YYYY results" sheet name.
+  var SEASON_YEAR_FALLBACK = 2026;
+  function seasonYear(data) {
+    return (data && data._meta && data._meta.season_year) || SEASON_YEAR_FALLBACK;
+  }
+
+  function ordinal(n) {
+    var mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 13) return n + "th";
+    return n + ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th");
+  }
+
+  function prizeIcon(rank, prize, year) {
+    var heading = year + " " + ordinal(rank) + " Prize:";
+    var icon = el("span", {
+      "class": "kyp-prize",
+      "tabindex": "0",
+      "role": "img",
+      "aria-label": heading + " " + prize,
+      "data-tip-heading": heading,
+      "data-tip-value": prize,
+    });
+    icon.innerHTML = PRIZE_SVG;
+    return icon;
+  }
+
   // ── Rank badge ───────────────────────────────────────────────────────────
-  function rankBadge(rank) {
+  function rankBadge(rank, prize, year) {
     var cls = "kyp-rank" + (rank === 1 ? " kyp-rank-1" : rank === 2 ? " kyp-rank-2" : rank === 3 ? " kyp-rank-3" : "");
-    return el("td", { "class": "kyp-td kyp-td-center" }, [el("span", { "class": cls }, ["#" + rank])]);
+    return el("td", { "class": "kyp-td kyp-td-center" }, [
+      el("span", { "class": "kyp-rank-wrap" }, [
+        el("span", { "class": cls }, ["#" + rank]),
+        prize ? prizeIcon(rank, prize, year) : null,
+      ]),
+    ]);
+  }
+
+  // ── Prize tooltip ────────────────────────────────────────────────────────
+  // One shared, position:fixed tooltip so it isn't clipped by the table
+  // wrapper's overflow. Shown on hover and keyboard focus.
+  function attachPrizeTooltip(root, scope) {
+    var tip = el("div", { "class": "kyp-tooltip", "role": "tooltip", "aria-hidden": "true" });
+    root.appendChild(tip);
+
+    function show(icon) {
+      tip.innerHTML = "";
+      tip.appendChild(el("div", { "class": "kyp-tooltip-heading" }, [icon.getAttribute("data-tip-heading")]));
+      tip.appendChild(el("div", { "class": "kyp-tooltip-value" },   [icon.getAttribute("data-tip-value")]));
+      tip.classList.add("is-visible");
+      var r  = icon.getBoundingClientRect();
+      var tr = tip.getBoundingClientRect();
+      var left = Math.round(r.left + r.width / 2 - tr.width / 2);
+      var top  = Math.round(r.top - tr.height - 8);
+      if (top < 4) top = Math.round(r.bottom + 8); // flip below if no room above
+      left = Math.max(4, Math.min(left, window.innerWidth - tr.width - 4));
+      tip.style.left = left + "px";
+      tip.style.top  = top  + "px";
+    }
+    function hide() { tip.classList.remove("is-visible"); }
+    function iconFrom(e) { return e.target.closest && e.target.closest(".kyp-prize"); }
+
+    scope.addEventListener("mouseover", function (e) { var i = iconFrom(e); if (i) show(i); });
+    scope.addEventListener("mouseout",  function (e) { if (iconFrom(e)) hide(); });
+    scope.addEventListener("focusin",   function (e) { var i = iconFrom(e); if (i) show(i); });
+    scope.addEventListener("focusout",  function (e) { if (iconFrom(e)) hide(); });
+    scope.addEventListener("scroll", hide, true);
+    window.addEventListener("scroll", hide, { passive: true });
   }
 
   // ── Medal cell ───────────────────────────────────────────────────────────
@@ -265,7 +361,8 @@
   }
 
   // ── Leaderboard table ────────────────────────────────────────────────────
-  function renderLeaderboard(rows, onNameClick) {
+  function renderLeaderboard(rows, onNameClick, prizeMap, year) {
+    prizeMap = prizeMap || {};
     if (!rows.length) {
       var empty = el("div", { "class": "kyp-empty-state" });
       empty.innerHTML = "<div class=\"kyp-empty-icon\">\uD83C\uDFC6</div><p>No results for this category yet.</p>";
@@ -303,7 +400,7 @@
         nameCell = el("td", { "class": "kyp-td kyp-td-name" }, [row.name]);
       }
       tbody.appendChild(el("tr", { "class": i % 2 === 0 ? "kyp-tr" : "kyp-tr kyp-tr-alt", "data-name": row.name }, [
-        rankBadge(displayRank),
+        rankBadge(displayRank, prizeMap[displayRank], year),
         nameCell,
         el("td", { "class": "kyp-td kyp-td-state" }, [row.state]),
         ptsTd,
@@ -469,11 +566,14 @@
       tableWrap.innerHTML  = "";
       tableWrap.appendChild(renderLeaderboard(
         buildLeaderboard(liveData, selGender, selEvent),
-        function (uuid, name) { openModal(uuid, name, buildPlayerResults(liveData, uuid), selEvent); }
+        function (uuid, name) { openModal(uuid, name, buildPlayerResults(liveData, uuid), selEvent); },
+        buildPrizeMap(liveData),
+        seasonYear(liveData)
       ));
       if (searchQuery.trim()) applySearch();
     }
 
+    attachPrizeTooltip(root, tableWrap);
     refresh();
 
     function highlightCurrent() {
@@ -588,6 +688,7 @@
     registerSW();
 
     var cached = LS.get(CACHE_KEY);
+    if (cached && (cached.error || !cached.results)) cached = null; // discard previously cached error payloads
     var handle = null;
     if (cached) handle = renderWidget(container, cached, true);
     else        renderSkeleton(container);

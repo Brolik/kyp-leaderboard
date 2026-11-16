@@ -11,7 +11,12 @@
     "docker:down": "docker compose --env-file .env.docker down",
     "craft": "docker compose exec web php /var/www/html/craft/craft",
     "composer": "docker compose exec web composer",
-    "docker:exec": "docker compose exec web"
+    "docker:exec": "docker compose exec web",
+    "php": "bro docker exec php",
+    "db:sync": "bro db sync",
+    "up": "bro docker up",
+    "down": "bro docker down",
+    "sleep": "bro docker sleep"
   },
   "devDependencies": {
     "chokidar": "^3.6.0",

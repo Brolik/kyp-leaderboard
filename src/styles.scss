@@ -15,6 +15,9 @@ $rank-silver-text:#475569;
 $rank-bronze-bg:  #fdf2e6;
 $rank-bronze-text:#92400e;
 
+$prize-bg:        #bbf7d0;
+$prize-ring:      #15803d;
+
 // ── Root ───────────────────────────────────────────────────────────────────
 .kyp-root {
   font-family: Hind, Arial, sans-serif;
@@ -260,6 +263,85 @@ $rank-bronze-text:#92400e;
   &.kyp-rank-3 { background: $rank-bronze-bg; color: $rank-bronze-text; }
 }
 
+// ── Prize money badge ──────────────────────────────────────────────────────
+// Every rank cell reserves the same gutter on both sides, and the $ sits
+// absolutely inside the right gutter, so the rank stays centred and
+// aligned whether or not a row has a prize.
+$prize-size: 20px;
+$prize-gap:  10px;
+
+.kyp-rank-wrap {
+  position: relative;
+  display: inline-block;
+  padding: 0 ($prize-size + $prize-gap);
+}
+
+.kyp-prize {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;          // vertical centring without transforms (avoids sub-pixel blur)
+  width: $prize-size;
+  height: $prize-size;
+  cursor: help;
+  --c-prize-bg: #{$prize-bg};
+  --c-prize-fg: #{$prize-ring};
+
+  svg { display: block; width: 100%; height: 100%; }
+}
+
+.kyp-prize:focus-visible {
+  outline: 2px solid var(--c-prize-fg);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+// ── Prize tooltip ──────────────────────────────────────────────────────────
+.kyp-tooltip {
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #111827;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .12s ease;
+
+  &.is-visible { opacity: 1; visibility: visible; }
+}
+
+.kyp-tooltip-heading { font-weight: 600; }
+
+.kyp-tooltip-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.kyp-prize-disc {
+  fill: var(--c-prize-bg);
+  stroke: var(--c-prize-fg);
+  stroke-width: 1.5;
+}
+
+.kyp-prize-sign {
+  fill: none;
+  stroke: var(--c-prize-fg);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 // ── Medal counts ───────────────────────────────────────────────────────────
 .kyp-medal-count {
   display: inline-flex;
@@ -372,6 +454,9 @@ $rank-bronze-text:#92400e;
     &.kyp-rank-2 { background: #1e293b; color: #94a3b8; }
     &.kyp-rank-3 { background: #3b1f06; color: #d97706; }
   }
+  .kyp-prize { --c-prize-bg: #14532d; --c-prize-fg: #4ade80; }
+  .kyp-tooltip { background: #f9fafb; color: #111827; }
+  .kyp-tooltip-value { color: #15803d; }
 
   .kyp-medal-count {
     &.kyp-medal-gold   { background: #451a03; color: #fbbf24; }
